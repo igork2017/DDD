@@ -1,9 +1,17 @@
 import React from "react";
 import {connect} from "react-redux";
-//import * as taskActions from "./taskActions";
-//import PropTypes from "prop-types";
+import {TasksState} from "../../store/tasks/types";
+import {actionTasks} from "../../store/tasks/actions";
+import {ApplicationState} from "../../store";
 
-class TasksPage extends React.Component {
+type TasksProps = typeof actionTasks & TasksState;
+
+class TasksPage extends React.Component<TasksProps> {
+  constructor(props: any) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
   state = {
     task: {
       title: "",
@@ -12,14 +20,16 @@ class TasksPage extends React.Component {
 
   handleChange = (event: {target: {value: any}}) => {
     const task = {...this.state.task, title: event.target.value};
-    this.setState({task});
+    this.setState({task: task});
   };
 
   handleSubmit = (event: {preventDefault: () => void}) => {
     event.preventDefault();
-    //  this.props.dispatch(taskActions.createTask(this.state.task));
+    this.props.addNewTask(this.state.task);
+
+    //alert(this.state.task.title);
+    //debugger;
   };
-  // static propTypes: {dispatch: any};
 
   render() {
     return (
@@ -32,15 +42,21 @@ class TasksPage extends React.Component {
           value={this.state.task.title}
         />
         <input type="submit" value="Save" />
+        {this.props.tasks.map((task) => (
+          <div key={task.title}>{task.title}</div>
+        ))}
       </form>
     );
   }
 }
 
-function mapStateToProps(state: {tasks: any}) {
+/* function mapStateToProps(state: TasksState, ownProps: TasksProps) {
   return {
     tasks: state.tasks,
   };
-}
+} */
 
-export default connect(mapStateToProps)(TasksPage);
+export default connect(
+  (state: ApplicationState) => state.tasks,
+  actionTasks
+)(TasksPage);
